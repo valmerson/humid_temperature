@@ -13,6 +13,12 @@
         stroke: black;
         stroke-width: 2;
       }
+      .circle-start {
+        fill: darkgreen;
+      }
+      .circle-end {
+        fill: red;
+      }
     </style>
   </head>
   <body>
@@ -44,69 +50,86 @@
         { nome_estacao: "NATAL", x1: 25.3, x2: 25.5, y1: 110 },
       ];
 
-      // Definindo os limoites do elemento SVG
       const width = 500;
       const height = 600;
-      const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+      const margin = { top: 20, right: 20, bottom: 30, left: 230 };
       const svg = d3.select("svg").attr("width", width).attr("height", height);
 
-      // Definindo a escala com base nos dados de minimo e máximmop que são salvos no array "data"
-      const xScale = d3
+      const xScale = d3.scaleLinear();
+      const xDomainMin = d3.min(data, function (d) {
+        return Math.min(d.x1, d.x2);
+      });
+      const xDomainMax = d3.max(data, function (d) {
+        return Math.max(d.x1, d.x2);
+      });
+      xScale.domain([xDomainMin - 1, xDomainMax + 1]);
+      xScale.range([margin.left, width - margin.right]);
 
-        .scaleLinear()
-        .domain([
-          d3.min(data, function (d) {
-            return Math.min(d.x1, d.x2);
-          }) - 1,
-          d3.max(data, function (d) {
-            return Math.max(d.x1, d.x2);
-          }) + 1,
-        ])
-        .range([margin.left, width - margin.right]);
+      const yScale = d3.scaleLinear();
+      const yDomainMax = d3.max(data, function (d) {
+        return d.y1;
+      });
+      yScale.domain([0, yDomainMax]);
+      yScale.range([height - margin.bottom, margin.top]);
 
-      const yScale = d3
-        .scaleLinear()
-        .domain([
-          0,
-          d3.max(data, function (d) {
-            return d.y1;
-          }),
-        ])
-        .range([height - margin.bottom, margin.top]);
-
-      // Desenhando as linhas com base nos valores de X e Y 1 e 2 para que a distribuição seja possivel
-      svg
-        .selectAll(".line")
-        .data(data)
+      const lines = svg.selectAll(".line").data(data);
+      lines
         .enter()
         .append("line")
-        .attr("x1", (d) => xScale(d.x1))
-        .attr("y1", (d) => yScale(d.y1))
-        .attr("x2", (d) => xScale(d.x2))
-        .attr("y2", (d) => yScale(d.y1))
+        .attr("x1", function (d) {
+          return xScale(d.x1);
+        })
+        .attr("y1", function (d) {
+          return yScale(d.y1);
+        })
+        .attr("x2", function (d) {
+          return xScale(d.x2);
+        })
+        .attr("y2", function (d) {
+          return yScale(d.y1);
+        })
         .attr("class", "line");
 
-      // Depois das linhas criadas, incluindo pontyos de circulo com raio 3 no inicio das linhas
-      svg
-        .selectAll(".circle-start")
-        .data(data)
+      const circlesStart = svg.selectAll(".circle-start").data(data);
+      circlesStart
         .enter()
         .append("circle")
-        .attr("cx", (d) => xScale(d.x1))
-        .attr("cy", (d) => yScale(d.y1))
+        .attr("cx", function (d) {
+          return xScale(d.x1);
+        })
+        .attr("cy", function (d) {
+          return yScale(d.y1);
+        })
         .attr("r", 3)
         .attr("class", "circle-start");
 
-      // Depois das linhas criadas, incluindo pontyos de circulo com raio 3 no final das linhas
-      svg
-        .selectAll(".circle-end")
-        .data(data)
+      const circlesEnd = svg.selectAll(".circle-end").data(data);
+      circlesEnd
         .enter()
         .append("circle")
-        .attr("cx", (d) => xScale(d.x2))
-        .attr("cy", (d) => yScale(d.y1))
+        .attr("cx", function (d) {
+          return xScale(d.x2);
+        })
+        .attr("cy", function (d) {
+          return yScale(d.y1);
+        })
         .attr("r", 3)
         .attr("class", "circle-end");
+
+      svg
+        .selectAll(".label")
+        .data(data)
+        .enter()
+        .append("text")
+        .attr("x", margin.left - 10)
+        .attr("y", function (d) {
+          return yScale(d.y1);
+        })
+        .attr("text-anchor", "end")
+        .text(function (d) {
+          return d.nome_estacao;
+        })
+        .attr("class", "label");
     </script>
   </body>
 </html>
