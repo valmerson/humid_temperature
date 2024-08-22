@@ -1,0 +1,1 @@
+Ests é o repositório para armazenar o gráfico em SVG criado como parte do trabalho 01do grupo 1 de Codificação Visual  da disciplina "DESENVOLVIMENTO DE INTERFACES NARRATIVAS PARA WEB" do master em jornalismo de dados, automação e datastorytelling do Insper. 
